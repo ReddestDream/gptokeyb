@@ -254,6 +254,41 @@ short char_to_keycode(const char* str)
     else if (strcmp(str, "0") == 0)
         return KEY_0;
 
+    else if (strcmp(str, "numpad1") == 0)
+        return KEY_KP1;
+    else if (strcmp(str, "numpad2") == 0)
+        return KEY_KP2;
+    else if (strcmp(str, "numpad3") == 0)
+        return KEY_KP3;
+    else if (strcmp(str, "numpad4") == 0)
+        return KEY_KP4;
+    else if (strcmp(str, "numpad5") == 0)
+        return KEY_KP5;
+    else if (strcmp(str, "numpad6") == 0)
+        return KEY_KP6;
+    else if (strcmp(str, "numpad7") == 0)
+        return KEY_KP7;
+    else if (strcmp(str, "numpad8") == 0)
+        return KEY_KP8;
+    else if (strcmp(str, "numpad9") == 0)
+        return KEY_KP9;
+    else if (strcmp(str, "numpad0") == 0)
+        return KEY_KP0;
+    else if (strcmp(str, "numpad*") == 0)
+        return KEY_KPASTERISK;
+    else if (strcmp(str, "numpad/") == 0)
+        return KEY_KPSLASH;
+    else if (strcmp(str, "numpad+") == 0)
+        return KEY_KPPLUS;
+    else if (strcmp(str, "numpad-") == 0)
+        return KEY_KPMINUS;
+    else if (strcmp(str, "numpad,") == 0)
+        return KEY_KPCOMMA;
+    else if (strcmp(str, "numpad.") == 0)
+        return KEY_KPDOT;
+    else if (strcmp(str, "numpadenter") == 0)
+        return KEY_KPENTER;
+
     else if (strcmp(str, "f1") == 0)
         return KEY_F1;
     else if (strcmp(str, "f2") == 0)
@@ -274,6 +309,10 @@ short char_to_keycode(const char* str)
         return KEY_F9;
     else if (strcmp(str, "f10") == 0)
         return KEY_F10;
+    else if (strcmp(str, "f11") == 0)
+        return KEY_F11;
+    else if (strcmp(str, "f12") == 0)
+        return KEY_F12;
 
     else if (strcmp(str, "@") == 0)
         return KEY_2; // with SHIFT
