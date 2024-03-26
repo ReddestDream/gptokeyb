@@ -399,24 +399,25 @@ void doKillMode()
     if (state.start_jsdevice == state.hotkey_jsdevice) {
         if (! sudo_kill) {
             // printf("Killing: %s\n", AppToKill);
-            system((" killall  '" + std::string(AppToKill) + "' ").c_str());
-            system("show_splash.sh exit");
+            system(("pkill -f '" + std::string(AppToKill) + "' ").c_str());
+            // system("show_splash.sh exit");
 
             sleep(3);
             if (system((" pgrep '" + std::string(AppToKill) + "' ").c_str()) == 0) {
                 printf("Forcefully Killing: %s\n", AppToKill);
-                system((" killall  -9 '" + std::string(AppToKill) + "' ").c_str());
+                system((" pkill -9 -f '" + std::string(AppToKill) + "' ").c_str());
             }
 
             exit(0); 
         } else {
             // printf("Killing: %s\n", AppToKill);
-            system((" sudo killall  '" + std::string(AppToKill) + "' ").c_str());
+            system((" sudo pkill -f '" + std::string(AppToKill) + "' ").c_str());
 
             sleep(3);
+
             if (system((" pgrep '" + std::string(AppToKill) + "' ").c_str()) == 0) {
                 printf("Forcefully Killing: %s\n", AppToKill);
-                system((" sudo killall  -9 '" + std::string(AppToKill) + "' ").c_str());
+                system((" sudo pkill -9 -f '" + std::string(AppToKill) + "' ").c_str());
             }
 
             exit(0); 
