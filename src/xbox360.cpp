@@ -37,6 +37,7 @@
 
 #include "gptokeyb.h"
 
+#ifndef USE_X11
 
 void UINPUT_SET_ABS_P(
     uinput_user_dev* dev,
@@ -212,3 +213,11 @@ void handleEventAxisFakeXbox360Device(const SDL_Event &event)
         break;
     }
 }
+#else
+void handleEventBtnFakeXbox360Device(const SDL_Event &event, bool is_pressed)
+{
+}
+void handleEventAxisFakeXbox360Device(const SDL_Event &event)
+{
+}
+#endif

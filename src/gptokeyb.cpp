@@ -37,8 +37,12 @@
 
 #include "gptokeyb.h"
 
+#ifdef USE_X11
+Display *display = NULL;
+#else
 int uinp_fd = -1;
 uinput_user_dev uidev;
+#endif
 
 bool kill_mode = false;
 bool sudo_kill = false; //allow sudo kill instead of killall for non-emuelec systems
@@ -184,7 +188,10 @@ int main(int argc, char* argv[])
     for( int ii = 1; ii < argc; ii++ )
     {      
         if (strcmp(argv[ii], "xbox360") == 0) {
+#ifndef USE_X11
+            // not available with X11 :D
             xbox360_mode = true;
+#endif
         } else if (strcmp(argv[ii], "textinput") == 0) {
             textinputinteractive_mode = true;
             state.textinputinteractive_mode_active = false;
@@ -243,6 +250,7 @@ int main(int argc, char* argv[])
     // Create fake input device (not needed in kill mode)
     //if (!kill_mode) {  
     if (config_mode || xbox360_mode || textinputinteractive_mode) { // initialise device, even in kill mode, now that kill mode will work with config & xbox modes
+#ifndef /* ! */ USE_X11
         uinp_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
         if (uinp_fd < 0) {
             printf("Unable to open /dev/uinput\n");
@@ -260,7 +268,9 @@ int main(int argc, char* argv[])
         } else {
             printf("Running in Fake Keyboard mode\n");
             setupFakeKeyboardMouseDevice(uidev, uinp_fd);
-
+#else
+            setupFakeKeyboardMouseDevice();
+#endif
             // if we are in config mode, read the file
             if (config_mode) {
                 printf("Using ConfigFile %s\n", config_file);
@@ -275,7 +285,9 @@ int main(int argc, char* argv[])
                     //textinputpreset_mode = false;   removed so that Enter key can be pressed
                 }
             } 
+#ifndef /* ! */ USE_X11
         }
+#endif
                         // if we are in textinputinteractive mode, initialise the character set
         if (textinputinteractive_mode) {
             initialiseCharacterSet();
@@ -286,13 +298,17 @@ int main(int argc, char* argv[])
                 printf("interactive text input mode includes extra symbols\n");
         
         }
+
+#ifndef /* ! */ USE_X11
         // Create input device into input sub-system
         write(uinp_fd, &uidev, sizeof(uidev));
 
         if (ioctl(uinp_fd, UI_DEV_CREATE)) {
             printf("Unable to create UINPUT device.");
+            shutdownFakeKeyboardMouseDevice();
             return -1;
         }
+#endif
     }
 
     if (const char* db_file = SDL_getenv("SDL_GAMECONTROLLERCONFIG_FILE")) {
@@ -330,6 +346,7 @@ int main(int argc, char* argv[])
         } else {
             if (!SDL_WaitEvent(&event)) {
                 printf("SDL_WaitEvent() failed: %s\n", SDL_GetError());
+                shutdownFakeKeyboardMouseDevice();
                 return -1;
             }
 
@@ -345,8 +362,6 @@ int main(int argc, char* argv[])
         */
     sleep(1);
 
-    /* Clean up */
-    ioctl(uinp_fd, UI_DEV_DESTROY);
-    close(uinp_fd);
+    shutdownFakeKeyboardMouseDevice();
     return 0;
 }

@@ -37,6 +37,62 @@
 
 #include "gptokeyb.h"
 
+#ifdef USE_X11
+void emitKey(int keysym, bool is_pressed, int modifier)
+{
+    KeyCode keycode = XKeysymToKeycode(display, keysym);
+    KeyCode modcode = modifier != 0 ? XKeysymToKeycode(display, modifier) : 0;
+
+    if (modcode && is_pressed)
+    {
+        XTestFakeKeyEvent(display, modcode, True, CurrentTime);
+        XFlush(display);
+    }
+
+    XTestFakeKeyEvent(display, keycode, is_pressed ? True : False, CurrentTime);
+    XFlush(display);
+
+    if (modcode && !is_pressed)
+    {
+        XTestFakeKeyEvent(display, modcode, False, CurrentTime);
+        XFlush(display);
+    }
+}
+
+void emitTextInputKey(int keysym, bool uppercase)
+{
+    if (uppercase)
+    {
+        emitKey(XK_Shift_L, true, 0);
+    }
+
+    emitKey(keysym, true, 0);
+    SDL_Delay(16);
+    emitKey(keysym, false, 0);
+    SDL_Delay(16);
+
+    if (uppercase)
+    {
+        emitKey(XK_Shift_L, false, 0);
+    }
+}
+
+void emitAxisMotion(int x, int y)
+{
+    XTestFakeMotionEvent(display, -1, x, y, CurrentTime); // -1 means relative to the current position
+    XFlush(display);
+}
+
+void emitMouseMotion(int x, int y)
+{
+    if (x != 0 || y != 0)
+    {
+        XTestFakeMotionEvent(display, -1, x, y, CurrentTime);
+        XFlush(display);
+    }
+}
+#else
+
 void emit(int type, int code, int val)
 {
     struct input_event ev;
@@ -102,6 +158,7 @@ void emitMouseMotion(int x, int y)
         emit(EV_SYN, SYN_REPORT, 0);
     }
 }
+#endif
 
 void handleAnalogTrigger(bool is_triggered, bool& was_triggered, int key, int modifier)
 {
@@ -398,7 +455,7 @@ void doKillMode()
     SDL_RemoveTimer( state.key_repeat_timer_id );
     if (state.start_jsdevice == state.hotkey_jsdevice) {
         if (! sudo_kill) {
-            // printf("Killing: %s\n", AppToKill);
+            printf("Killing: %s\n", AppToKill);
             system(("pkill -f '" + std::string(AppToKill) + "' ").c_str());
             // system("show_splash.sh exit");
 
@@ -410,7 +467,7 @@ void doKillMode()
 
             exit(0); 
         } else {
-            // printf("Killing: %s\n", AppToKill);
+            printf("Killing: %s\n", AppToKill);
             system((" sudo pkill -f '" + std::string(AppToKill) + "' ").c_str());
 
             sleep(3);

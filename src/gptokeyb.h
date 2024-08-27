@@ -42,11 +42,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef USE_X11
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <X11/extensions/XTest.h>
+#include "x11_defines.h"
+
+#else
 #include <linux/input.h>
 #include <linux/uinput.h>
 
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
+#endif
 
 #include <fcntl.h>
 #include <sstream>
@@ -76,7 +84,12 @@ void prevTextInputKey(bool SingleIncrease);
 
 void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed);
 
+#ifndef /* ! */ USE_X11
 void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd);
+#else
+void setupFakeKeyboardMouseDevice();
+#endif
+void shutdownFakeKeyboardMouseDevice();
 void handleEventBtnFakeKeyboardMouseDevice(const SDL_Event &event, bool is_pressed);
 void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event);
 
@@ -85,7 +98,9 @@ void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event);
 bool handleInputEvent(const SDL_Event& event);
 
 // Xbox360.cpp
+#ifndef /* ! */ USE_X11
 void setupFakeXbox360Device(uinput_user_dev& device, int fd);
+#endif
 void handleEventBtnFakeXbox360Device(const SDL_Event &event, bool is_pressed);
 void handleEventAxisFakeXbox360Device(const SDL_Event &event);
 
@@ -110,8 +125,13 @@ void processKeys();
 extern GptokeybConfig config;
 extern GptokeybState state;
 
+#ifdef USE_X11
+extern Display *display;
+#else
 extern int uinp_fd;
 extern uinput_user_dev uidev;
+#endif
+
 
 extern bool kill_mode;
 extern bool sudo_kill;      //allow sudo kill instead of killall for non-emuelec systems
