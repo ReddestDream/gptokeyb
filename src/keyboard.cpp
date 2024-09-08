@@ -336,26 +336,7 @@ void prevTextInputKey(bool SingleDecrease)
     addTextInputCharacter(); //add new character
 }
 
-#ifdef USE_X11
-void setupFakeKeyboardMouseDevice()
-{
-    display = XOpenDisplay(NULL);
-    if (display == NULL)
-    {
-        fprintf(stderr, "Unable to open X display\n");
-        exit(1);
-    }
-}
-void shutdownFakeKeyboardMouseDevice()
-{
-    if (display != NULL)
-    {
-        XCloseDisplay(display);
-        display = NULL;
-    }
-}
-#else
-void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
+int setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
 {
     strncpy(device.name, "Fake Keyboard", UINPUT_MAX_NAME_SIZE);
     device.id.vendor = 0x1234;  /* sample vendor */
@@ -375,14 +356,16 @@ void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd)
     ioctl(fd, UI_SET_RELBIT, REL_Y);
     ioctl(fd, UI_SET_KEYBIT, BTN_LEFT);
     ioctl(fd, UI_SET_KEYBIT, BTN_RIGHT);
+
+    return 0;
 }
+
 void shutdownFakeKeyboardMouseDevice()
 {
     /* Clean up */
     ioctl(uinp_fd, UI_DEV_DESTROY);
     close(uinp_fd);
 }
-#endif
 
 void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed)
 {

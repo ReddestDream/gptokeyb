@@ -53,7 +53,7 @@ void UINPUT_SET_ABS_P(
     dev->absflat[axis] = flat;
 }
 
-void setupFakeXbox360Device(uinput_user_dev& device, int fd)
+int setupFakeXbox360Device(uinput_user_dev& device, int fd)
 {
     strncpy(device.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
     device.id.vendor = 0x045e;  /* sample vendor */
@@ -79,8 +79,8 @@ void setupFakeXbox360Device(uinput_user_dev& device, int fd)
             ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||
             ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||
             ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {
-        printf("Failed to configure fake Xbox 360 controller\n");
-        exit(-1);
+        fprintf(stderr, "Failed to configure fake Xbox 360 controller\n");
+        return -1;
     }
 
     UINPUT_SET_ABS_P(&device, ABS_X, -32768, 32767, 16, 128);
@@ -91,6 +91,8 @@ void setupFakeXbox360Device(uinput_user_dev& device, int fd)
     UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);
     UINPUT_SET_ABS_P(&device, ABS_Z, 0, 255, 0, 0);
     UINPUT_SET_ABS_P(&device, ABS_RZ, 0, 255, 0, 0);
+
+    return 0;
 }
 
 

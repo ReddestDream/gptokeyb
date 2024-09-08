@@ -48,6 +48,11 @@ enum DZ_MODE {
     DZ_HYBRID,
 };
 
+enum OM_MODE {
+    OM_UINPUT,
+    OM_X11,
+};
+
 
 #define GBTN_NONE 0
 

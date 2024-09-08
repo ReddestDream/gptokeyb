@@ -44,7 +44,8 @@ std::vector<config_option> parseConfigFile(const char* path)
     FILE* fp;
 
     if ((fp = fopen(path, "r+")) == NULL) {
-        perror("fopen()");
+        fprintf(stderr, "fopen(%s):", path);
+        perror("");
         return result;
     }
 

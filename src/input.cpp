@@ -46,11 +46,12 @@ bool handleInputEvent(const SDL_Event& event)
         {
             const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
 
+            fprintf(stderr, "SDL_BTN_%s: %d\n", (is_pressed ? "DOWN" : "UP"), event.cbutton.button);
+
             if (state.textinputinteractive_mode_active) {
                 handleEventBtnInteractiveKeyboard(event, is_pressed);
             } else if (xbox360_mode) {
                 handleEventBtnFakeXbox360Device(event, is_pressed);
-
             } else {
                 handleEventBtnFakeKeyboardMouseDevice(event, is_pressed);
             }
@@ -67,12 +68,12 @@ bool handleInputEvent(const SDL_Event& event)
 
     case SDL_CONTROLLERDEVICEADDED:
         if (xbox360_mode == true || config_mode == true) {
-            SDL_GameControllerOpen(0);
+            SDL_GameControllerOpen(event.cdevice.which);
 
-            SDL_GameController* controller = SDL_GameControllerOpen(0);
+            SDL_GameController* controller = SDL_GameControllerOpen(event.cdevice.which);
             if (controller) {
-                const char *name = SDL_GameControllerNameForIndex(0);
-                printf("Joystick %i has game controller name '%s'\n", 0, name);
+                const char *name = SDL_GameControllerNameForIndex(event.cdevice.which);
+                printf("Joystick %i has game controller name '%s'\n", event.cdevice.which, name);
             }
 
         } else {

@@ -42,19 +42,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef USE_X11
-#include <X11/Xlib.h>
-#include <X11/keysym.h>
-#include <X11/extensions/XTest.h>
-#include "x11_defines.h"
-
-#else
 #include <linux/input.h>
 #include <linux/uinput.h>
 
 #include <libevdev-1.0/libevdev/libevdev-uinput.h>
 #include <libevdev-1.0/libevdev/libevdev.h>
-#endif
 
 #include <fcntl.h>
 #include <sstream>
@@ -84,11 +76,7 @@ void prevTextInputKey(bool SingleIncrease);
 
 void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed);
 
-#ifndef /* ! */ USE_X11
-void setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd);
-#else
-void setupFakeKeyboardMouseDevice();
-#endif
+int setupFakeKeyboardMouseDevice(uinput_user_dev& device, int fd);
 void shutdownFakeKeyboardMouseDevice();
 void handleEventBtnFakeKeyboardMouseDevice(const SDL_Event &event, bool is_pressed);
 void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event);
@@ -98,18 +86,38 @@ void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event);
 bool handleInputEvent(const SDL_Event& event);
 
 // Xbox360.cpp
-#ifndef /* ! */ USE_X11
-void setupFakeXbox360Device(uinput_user_dev& device, int fd);
-#endif
+int setupFakeXbox360Device(uinput_user_dev& device, int fd);
 void handleEventBtnFakeXbox360Device(const SDL_Event &event, bool is_pressed);
 void handleEventAxisFakeXbox360Device(const SDL_Event &event);
 
+// output handling.
+int emit_init_uinput();
+void emit_quit_uinput();
+
+void emitKey_uinput(int code, bool is_pressed, int modifier = 0);
+void emitTextInputKey_uinput(int code, bool uppercase);
+void emitAxisMotion_uinput(int code, int value);
+void emitMouseMotion_uinput(int x, int y);
+
+#ifdef ENABLE_X11
+int emit_init_x11();
+void emit_quit_x11();
+
+void emitKey_x11(int keysym, bool is_pressed, int modifier = 0);
+void emitTextInputKey_x11(int code, bool uppercase);
+void emitAxisMotion_x11(int x, int y);
+void emitMouseMotion_x11(int x, int y);
+#endif
+
 // util.cpp
-void emit(int type, int code, int val);
-void emitMouseMotion(int x, int y);
-void emitAxisMotion(int code, int value);
-void emitTextInputKey(int code, bool uppercase);
+
+int emit_init();
+void emit_quit();
+
 void emitKey(int code, bool is_pressed, int modifier = 0);
+void emitMouseMotion(int x, int y);
+void emitTextInputKey(int code, bool uppercase);
+void emitAxisMotion(int code, int value);
 void handleAnalogTrigger(bool is_triggered, bool& was_triggered, int key, int modifier = 0);
 
 short char_to_keycode(const char* str);
@@ -121,23 +129,18 @@ int applyDeadzone(int value, int deadzone);
 void setKeyRepeat(int code, bool is_pressed);
 void processKeys();
 
+extern int uinp_fd;
+extern uinput_user_dev uidev;
 
 extern GptokeybConfig config;
 extern GptokeybState state;
-
-#ifdef USE_X11
-extern Display *display;
-#else
-extern int uinp_fd;
-extern uinput_user_dev uidev;
-#endif
-
 
 extern bool kill_mode;
 extern bool sudo_kill;      //allow sudo kill instead of killall for non-emuelec systems
 extern bool pckill_mode;    //emit alt+f4 to close apps on pc during kill mode, if env variable is set
 extern bool openbor_mode;
 extern bool xbox360_mode;
+extern OM_MODE output_mode;
 extern bool textinputpreset_mode; 
 extern bool textinputinteractive_mode;
 extern bool textinputinteractive_noautocapitals;

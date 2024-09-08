@@ -37,128 +37,72 @@
 
 #include "gptokeyb.h"
 
-#ifdef USE_X11
+
+int emit_init()
+{
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        return emit_init_x11();
+    else
+#endif
+        return emit_init_uinput();
+}
+
+
+void emit_quit()
+{
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        emit_quit_x11();
+    else
+#endif
+        emit_quit_uinput();
+}
+
+
 void emitKey(int keysym, bool is_pressed, int modifier)
 {
-    KeyCode keycode = XKeysymToKeycode(display, keysym);
-    KeyCode modcode = modifier != 0 ? XKeysymToKeycode(display, modifier) : 0;
-
-    if (modcode && is_pressed)
-    {
-        XTestFakeKeyEvent(display, modcode, True, CurrentTime);
-        XFlush(display);
-    }
-
-    XTestFakeKeyEvent(display, keycode, is_pressed ? True : False, CurrentTime);
-    XFlush(display);
-
-    if (modcode && !is_pressed)
-    {
-        XTestFakeKeyEvent(display, modcode, False, CurrentTime);
-        XFlush(display);
-    }
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        emitKey_x11(keysym, is_pressed, modifier);
+    else
+#endif
+        emitKey_uinput(keysym, is_pressed, modifier);
 }
+
 
 void emitTextInputKey(int keysym, bool uppercase)
 {
-    if (uppercase)
-    {
-        emitKey(XK_Shift_L, true, 0);
-    }
-
-    emitKey(keysym, true, 0);
-    SDL_Delay(16);
-    emitKey(keysym, false, 0);
-    SDL_Delay(16);
-
-    if (uppercase)
-    {
-        emitKey(XK_Shift_L, false, 0);
-    }
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        emitTextInputKey_x11(keysym, uppercase);
+    else
+#endif
+        emitTextInputKey_uinput(keysym, uppercase);
 }
+
 
 void emitAxisMotion(int x, int y)
 {
-    XTestFakeMotionEvent(display, -1, x, y, CurrentTime); // -1 means relative to the current position
-    XFlush(display);
-}
-
-void emitMouseMotion(int x, int y)
-{
-    if (x != 0 || y != 0)
-    {
-        XTestFakeMotionEvent(display, -1, x, y, CurrentTime);
-        XFlush(display);
-    }
-}
-#else
-
-void emit(int type, int code, int val)
-{
-    struct input_event ev;
-
-    ev.type = type;
-    ev.code = code;
-    ev.value = val;
-    /* timestamp values below are ignored */
-    ev.time.tv_sec = 0;
-    ev.time.tv_usec = 0;
-
-    write(uinp_fd, &ev, sizeof(ev));
-}
-
-void emitKey(int code, bool is_pressed, int modifier)
-{
-    if (code == 0)
-        return;
-
-    if (!(modifier == 0) && is_pressed) {
-        emit(EV_KEY, modifier, is_pressed ? 1 : 0);
-        emit(EV_SYN, SYN_REPORT, 0);
-    }
-    emit(EV_KEY, code, is_pressed ? 1 : 0);
-    emit(EV_SYN, SYN_REPORT, 0);
-    if (!(modifier == 0) && !(is_pressed)) {
-        emit(EV_KEY, modifier, is_pressed ? 1 : 0);
-        emit(EV_SYN, SYN_REPORT, 0);
-    }
-}
-
-void emitTextInputKey(int code, bool uppercase)
-{
-    if (uppercase) { //capitalise capital letters by holding shift
-        emitKey(KEY_LEFTSHIFT, true);
-    }
-    emitKey(code, true);
-    SDL_Delay(16);
-    emitKey(code, false);
-    SDL_Delay(16);
-    if (uppercase) { //release shift if held
-        emitKey(KEY_LEFTSHIFT, false);
-    }
-}
-
-
-void emitAxisMotion(int code, int value)
-{
-    emit(EV_ABS, code, value);
-    emit(EV_SYN, SYN_REPORT, 0);
-}
-
-void emitMouseMotion(int x, int y)
-{
-    if (x != 0) {
-        emit(EV_REL, REL_X, x);
-    }
-    if (y != 0) {
-        emit(EV_REL, REL_Y, y);
-    }
-
-    if (x != 0 || y != 0) {
-        emit(EV_SYN, SYN_REPORT, 0);
-    }
-}
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        emitAxisMotion_x11(x, y);
+    else
 #endif
+        emitAxisMotion_uinput(x, y);
+}
+
+
+void emitMouseMotion(int x, int y)
+{
+#ifdef ENABLE_X11
+    if (output_mode == OM_X11)
+        emitMouseMotion_x11(x, y);
+    else
+#endif
+        emitMouseMotion_uinput(x, y);
+}
+
 
 void handleAnalogTrigger(bool is_triggered, bool& was_triggered, int key, int modifier)
 {
@@ -170,6 +114,7 @@ void handleAnalogTrigger(bool is_triggered, bool& was_triggered, int key, int mo
 
     was_triggered = is_triggered;
 }
+
 
 // convert ASCII chars to key codes
 short char_to_keycode(const char* str)
@@ -443,6 +388,7 @@ short char_to_keycode(const char* str)
     // Default
     return 0;
 }
+
 
 void doKillMode()
 {
