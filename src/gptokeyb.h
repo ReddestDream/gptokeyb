@@ -145,6 +145,7 @@ extern bool textinputpreset_mode;
 extern bool textinputinteractive_mode;
 extern bool textinputinteractive_noautocapitals;
 extern bool textinputinteractive_extrasymbols;
+extern bool textinputinteractive_numbersonly;
 extern bool app_exult_adjust;
 
 extern char* AppToKill;
