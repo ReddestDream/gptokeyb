@@ -49,6 +49,7 @@ bool textinputpreset_mode = false;
 bool textinputinteractive_mode = false;
 bool textinputinteractive_noautocapitals = false;
 bool textinputinteractive_extrasymbols = false;
+bool textinputinteractive_numbersonly = false;
 bool app_exult_adjust = false;
 
 char* AppToKill;
@@ -236,6 +237,11 @@ int main(int argc, char* argv[])
                 textinputinteractive_extrasymbols = true;
             }
         }    
+        if (char* env_textinput_numbersonly = SDL_getenv("TEXTINPUTNUMBERSONLY")) { // only use numbers 0 - 9
+            if (strcmp(env_textinput_numbersonly,"Y") == 0) {
+                textinputinteractive_numbersonly = true;
+            }
+        } 
     }
 
 
@@ -276,6 +282,8 @@ int main(int argc, char* argv[])
                 printf("interactive text input mode without auto-capitals\n");
             if (textinputinteractive_extrasymbols)
                 printf("interactive text input mode includes extra symbols\n");
+            if (textinputinteractive_numbersonly)
+                printf("interactive text input mode with numbers only\n");
         }
     }
 

@@ -52,11 +52,20 @@ void initialiseCharacters()
 {
     if (textinputinteractive_noautocapitals) {
         current_key[0] = 26; // if environment variable has been set to disable capitalisation of first characters start with all lower case  
+    } else if (textinputinteractive_numbersonly) {
+        current_key[0] = 52; // start at 0 if numbers only
     } else {
         current_key[0] = 0; // otherwise start with upper case for 1st character
     }
-    for (int ii = 1; ii < maxChars; ii++) { // start with lower case for other character onwards
-        current_key[ii] = 26;
+    if (textinputinteractive_numbersonly) {
+        for (int ii = 1; ii < maxChars; ii++) { // start at 0 if numbers only
+            current_key[ii] = 52;
+        }
+    }
+    else {
+        for (int ii = 1; ii < maxChars; ii++) { // start with lower case for other character onwards
+            current_key[ii] = 26;
+        }
     }
 }
 
@@ -306,15 +315,22 @@ void confirmTextInputCharacter()
 void nextTextInputKey(bool SingleIncrease) // enable fast skipping if SingleIncrease = false
 {
     removeTextInputCharacter(); //delete character(s)
-    if (SingleIncrease) {
+    if (SingleIncrease || textinputinteractive_numbersonly) {
         current_key[current_character]++;
+        if (textinputinteractive_numbersonly) { // wraparound for numbers only
+            if (current_key[current_character] > 61) {
+                current_key[current_character] = 52;
+            }
+        }
     } else {
-        current_key[current_character] = current_key[current_character] + 13; // jump forward by half alphabet
+        current_key[current_character] = current_key[current_character] + 13; // jump forward by half alphabet for other modes
     }
-    if (current_key[current_character] >= maxKeys) {
-        current_key[current_character] = current_key[current_character] - maxKeys;
-    } else if ((current_character == 0) && (character_set[current_key[current_character]] == KEY_SPACE)) {
-        current_key[current_character]++; //skip space as first character 
+    if (!textinputinteractive_numbersonly) {
+        if (current_key[current_character] >= maxKeys) {
+            current_key[current_character] = current_key[current_character] - maxKeys;
+        } else if ((current_character == 0) && (character_set[current_key[current_character]] == KEY_SPACE)) {
+            current_key[current_character]++; //skip space as first character
+        }
     }
 
     addTextInputCharacter(); //add new character
@@ -323,16 +339,24 @@ void nextTextInputKey(bool SingleIncrease) // enable fast skipping if SingleIncr
 void prevTextInputKey(bool SingleDecrease)
 {
     removeTextInputCharacter(); //delete character(s)
-    if (SingleDecrease) {
+    if (SingleDecrease || textinputinteractive_numbersonly) {
         current_key[current_character]--;
+        if (textinputinteractive_numbersonly) { // wraparound for numbers only
+            if (current_key[current_character] < 52) {
+                current_key[current_character] = 61;
+            }
+        }
     } else {
-        current_key[current_character] = current_key[current_character] - 13; // jump back by half alphabet  
+        current_key[current_character] = current_key[current_character] - 13; // jump back by half alphabet
     }
-    if (current_key[current_character] < 0) {
-        current_key[current_character] = current_key[current_character] + maxKeys;
-    } else if ((current_character == 0) && (character_set[current_key[current_character]] == KEY_SPACE)) {
-        current_key[current_character]--; //skip space as first character due to weird graphical issue with Exult
+    if (!textinputinteractive_numbersonly) {
+        if (current_key[current_character] < 0) {
+            current_key[current_character] = current_key[current_character] + maxKeys;
+        } else if ((current_character == 0) && (character_set[current_key[current_character]] == KEY_SPACE)) {
+            current_key[current_character]--; //skip space as first character due to weird graphical issue with Exult
+        }
     }
+
     addTextInputCharacter(); //add new character
 }
 
