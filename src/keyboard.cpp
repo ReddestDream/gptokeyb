@@ -419,7 +419,7 @@ void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed)
             } else { // reached limit of characters
                 confirmTextInputCharacter();
                 state.textinputinteractive_mode_active = false;
-                printf("text input interactive mode no longer active\n");
+                printf("[GPTK]: text input interactive mode no longer active\n");
             }
         }
         break; //SDL_CONTROLLER_BUTTON_DPAD_RIGHT
@@ -465,7 +465,7 @@ void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed)
             confirmTextInputCharacter();
             //disable interactive mode
             state.textinputinteractive_mode_active = false;
-            printf("text input interactive mode no longer active\n");
+            printf("[GPTK]: text input interactive mode no longer active\n");
         }
         break; //SDL_CONTROLLER_BUTTON_A
 
@@ -480,7 +480,7 @@ void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed)
             }
             initialiseCharacters(); //reset the character selections ready for new text to be added later
             state.textinputinteractive_mode_active = false;
-            printf("text input interactive mode no longer active\n");
+            printf("[GPTK]: text input interactive mode no longer active\n");
         }
         break; //SDL_CONTROLLER_BUTTON_BACK
 
@@ -489,7 +489,7 @@ void handleEventBtnInteractiveKeyboard(const SDL_Event &event, bool is_pressed)
             confirmTextInputCharacter(); // send ENTER key to confirm text entry
             //disable interactive mode
             state.textinputinteractive_mode_active = false;
-            printf("text input interactive mode no longer active\n");
+            printf("[GPTK]: text input interactive mode no longer active\n");
         }
         break; //SDL_CONTROLLER_BUTTON_START
 
@@ -740,11 +740,11 @@ void handleEventBtnFakeKeyboardMouseDevice(const SDL_Event& event, bool is_press
         doKillMode();
     } //kill mode 
     else if ((textinputpreset_mode) && (state.textinputpresettrigger_pressed && state.start_pressed)) { //activate input preset mode - send predefined text as a series of keystrokes
-        printf("text input preset pressed\n");
+        printf("[GPTK]: text input preset pressed\n");
         state.start_combo_triggered = true;
         if (state.start_jsdevice == state.textinputpresettrigger_jsdevice) {
             if (config.text_input_preset != NULL) {
-                printf("text input processing %s\n", config.text_input_preset);
+                printf("[GPTK]: text input processing %s\n", config.text_input_preset);
                 processKeys();
             }
         }
@@ -754,10 +754,10 @@ void handleEventBtnFakeKeyboardMouseDevice(const SDL_Event& event, bool is_press
         state.textinputpresettrigger_jsdevice = 0;
     } //input preset trigger mode (i.e. not kill mode)
     else if ((textinputpreset_mode) && (state.textinputconfirmtrigger_pressed && state.start_pressed)) { //activate input preset confirm mode - send ENTER key
-        printf("text input confirm pressed\n");
+        printf("[GPTK]: text input confirm pressed\n");
         state.start_combo_triggered = true;
         if (state.start_jsdevice == state.textinputconfirmtrigger_jsdevice) {
-            printf("text input Enter key\n");
+            printf("[GPTK]: text input Enter key\n");
             emitKey(char_to_keycode("enter"), true);
             SDL_Delay(15);
             emitKey(char_to_keycode("enter"), false);
@@ -768,10 +768,10 @@ void handleEventBtnFakeKeyboardMouseDevice(const SDL_Event& event, bool is_press
         state.textinputconfirmtrigger_jsdevice = 0;
     } //input confirm trigger mode (i.e. not kill mode)         
     else if ((textinputinteractive_mode) && (state.textinputinteractivetrigger_pressed && state.start_pressed)) { //activate interactive text input mode
-        printf("text input interactive pressed\n");
+        printf("[GPTK]: text input interactive pressed\n");
         state.start_combo_triggered = true;
         if (state.start_jsdevice == state.textinputinteractivetrigger_jsdevice) {
-            printf("text input interactive mode active\n");
+            printf("[GPTK]: text input interactive mode active\n");
             state.textinputinteractive_mode_active = true;
             SDL_RemoveTimer( state.key_repeat_timer_id ); // disable any active key repeat timer
             current_character = 0;

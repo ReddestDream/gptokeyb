@@ -46,7 +46,7 @@ bool handleInputEvent(const SDL_Event& event)
         {
             const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
             if (verbose) {
-                fprintf(stderr, "SDL_BTN_%s: %d\n", (is_pressed ? "DOWN" : "UP"), event.cbutton.button);
+                fprintf(stderr, "[GPTK]: SDL_BTN_%s: %d\n", (is_pressed ? "DOWN" : "UP"), event.cbutton.button);
             }
 
             if (state.textinputinteractive_mode_active) {
@@ -74,7 +74,7 @@ bool handleInputEvent(const SDL_Event& event)
             SDL_GameController* controller = SDL_GameControllerOpen(event.cdevice.which);
             if (controller) {
                 const char *name = SDL_GameControllerNameForIndex(event.cdevice.which);
-                printf("Joystick %i has game controller name '%s'\n", event.cdevice.which, name);
+                printf("[GPTK]: Joystick %i has game controller name '%s'\n", event.cdevice.which, name);
             }
 
         } else {

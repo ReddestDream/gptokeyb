@@ -42,12 +42,12 @@ uinput_user_dev uidev;
 
 int emit_init_uinput()
 {
-    fprintf(stderr, "Running in UINPUT output mode.\n");
+    fprintf(stderr, "[GPTK]: Running in UINPUT output mode.\n");
     int success = 0;
 
     uinp_fd = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
     if (uinp_fd < 0) {
-        fprintf(stderr, "Unable to open /dev/uinput\n");
+        fprintf(stderr, "[GPTK]: Unable to open /dev/uinput\n");
         return -1;
     }
 
@@ -57,7 +57,7 @@ int emit_init_uinput()
     uidev.id.bustype = BUS_USB;
 
     if (xbox360_mode) {
-        printf("Running in Fake Xbox 360 Mode\n");
+        printf("[GPTK]: Running in Fake Xbox 360 Mode\n");
         success = setupFakeXbox360Device(uidev, uinp_fd);
 
         if (success < 0)
@@ -66,7 +66,7 @@ int emit_init_uinput()
             return success;
         }
     } else {
-        printf("Running in Fake Keyboard mode\n");
+        printf("[GPTK]: Running in Fake Keyboard mode\n");
         success = setupFakeKeyboardMouseDevice(uidev, uinp_fd);
 
         if (success < 0)
@@ -80,7 +80,7 @@ int emit_init_uinput()
     write(uinp_fd, &uidev, sizeof(uidev));
 
     if (ioctl(uinp_fd, UI_DEV_CREATE)) {
-        fprintf(stderr, "Unable to create UINPUT device.");
+        fprintf(stderr, "[GPTK]: Unable to create UINPUT device.");
         shutdownFakeKeyboardMouseDevice();
         uinp_fd = -1;
         return -1;

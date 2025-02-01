@@ -191,7 +191,7 @@ int main(int argc, char* argv[])
             textinputinteractive_mode = true;
             state.textinputinteractive_mode_active = false;
         } else if (strcmp(argv[ii], "-x11") == 0) {
-            fprintf(stderr, "ENABLE X11\n");
+            fprintf(stderr, "[GPTK]: ENABLE X11\n");
 #ifdef ENABLE_X11
             output_mode = OM_X11;
 #endif
@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
             }
             
         } else if (( strcmp(argv[ii], "-v") == 0)) {
-                printf("Verbose logging enabled\n");
+                printf("[GPTK]: Verbose logging enabled\n");
                 verbose = true;
         }
     }
@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 
     // SDL initialization and main loop
     if (SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_TIMER) != 0) {
-        printf("SDL_Init() failed: %s\n", SDL_GetError());
+        printf("[GPTK]: SDL_Init() failed: %s\n", SDL_GetError());
         return -1;
     }
 
@@ -264,16 +264,16 @@ int main(int argc, char* argv[])
 
         // if we are in config mode, read the file
         if (config_mode) {
-            printf("Using ConfigFile %s\n", config_file);
+            printf("[GPTK]: Using ConfigFile %s\n", config_file);
             readConfigFile(config_file);
         }
 
         // if we are in textinput mode, note the text preset
         if (textinputpreset_mode) {
             if (config.text_input_preset != NULL) {
-                printf("text input preset is %s\n", config.text_input_preset);
+                printf("[GPTK]: text input preset is %s\n", config.text_input_preset);
             } else {
-                printf("text input preset is not set\n");
+                printf("[GPTK]: text input preset is not set\n");
                 //textinputpreset_mode = false;   removed so that Enter key can be pressed
             }
         } 
@@ -281,13 +281,13 @@ int main(int argc, char* argv[])
         // if we are in textinputinteractive mode, initialise the character set
         if (textinputinteractive_mode) {
             initialiseCharacterSet();
-            printf("interactive text input mode available\n");
+            printf("[GPTK]: interactive text input mode available\n");
             if (textinputinteractive_noautocapitals)
-                printf("interactive text input mode without auto-capitals\n");
+                printf("[GPTK]: interactive text input mode without auto-capitals\n");
             if (textinputinteractive_extrasymbols)
-                printf("interactive text input mode includes extra symbols\n");
+                printf("[GPTK]: interactive text input mode includes extra symbols\n");
             if (textinputinteractive_numbersonly)
-                printf("interactive text input mode with numbers only\n");
+                printf("[GPTK]: interactive text input mode with numbers only\n");
         }
     }
 
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
             SDL_Delay(config.fake_mouse_delay);
         } else {
             if (!SDL_WaitEvent(&event)) {
-                printf("SDL_WaitEvent() failed: %s\n", SDL_GetError());
+                printf("[GPTK]: SDL_WaitEvent() failed: %s\n", SDL_GetError());
                 shutdownFakeKeyboardMouseDevice();
                 return -1;
             }
