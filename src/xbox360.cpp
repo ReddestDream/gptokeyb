@@ -79,7 +79,7 @@ int setupFakeXbox360Device(uinput_user_dev& device, int fd)
             ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||
             ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||
             ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {
-        fprintf(stderr, "Failed to configure fake Xbox 360 controller\n");
+        fprintf(stderr, "[GPTK]: Failed to configure fake Xbox 360 controller\n");
         return -1;
     }
 

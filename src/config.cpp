@@ -44,7 +44,7 @@ std::vector<config_option> parseConfigFile(const char* path)
     FILE* fp;
 
     if ((fp = fopen(path, "r+")) == NULL) {
-        fprintf(stderr, "fopen(%s):", path);
+        fprintf(stderr, "[GPTK]: fopen(%s):", path);
         perror("");
         return result;
     }

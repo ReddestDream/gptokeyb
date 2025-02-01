@@ -167,7 +167,7 @@ static inline int keysm_to_x11keysym(int keysym)
 
 int emit_init_x11()
 {
-    fprintf(stderr, "Running in X11 output mode.\n");
+    fprintf(stderr, "[GPTK]: Running in X11 output mode.\n");
     Display *display = XOpenDisplay(NULL);
 
     if (xbox360_mode)
@@ -175,7 +175,7 @@ int emit_init_x11()
 
     if (display == NULL)
     {
-        fprintf(stderr, "Cannot open display\n");
+        fprintf(stderr, "[GPTK]: Cannot open display\n");
         return -1;
     }
 
