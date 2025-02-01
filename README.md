@@ -44,6 +44,8 @@ gptokeyb provides a kill switch for an application and mapping of gamepad button
 
 `-sudokill` indicates that `sudo kill -9 <application name>` will be used to close the application instead of `killall <application name>`
 
+` -v` enables verbose log output which provides more details in logfiles
+
 ### Keyboard Mapping Options
 The config file that specifies button mapping for keyboard and mouse functions takes the form of `%s = %s` which is `gamepad button` = `keyboard key`. Any comment lines beginning with `#` are ignored. Deadzone values are used for analog sticks and triggers, and may be device specific. `mouse_scale` affects the speed of mouse movement, with a larger value causing slower movement. `mouse_scale = 8192` generally works well for RK3326 devices. `gamepad button = \"` can be used to unassign a button.
 

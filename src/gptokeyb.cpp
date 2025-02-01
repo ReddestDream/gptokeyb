@@ -45,6 +45,7 @@ bool sudo_kill = false; //allow sudo kill instead of killall for non-emuelec sys
 bool pckill_mode = false; //emit alt+f4 to close apps on pc during kill mode, if env variable is set
 bool openbor_mode = false;
 bool xbox360_mode = false;
+bool verbose = false;
 bool textinputpreset_mode = false; 
 bool textinputinteractive_mode = false;
 bool textinputinteractive_noautocapitals = false;
@@ -222,7 +223,10 @@ int main(int argc, char* argv[])
                 }
             }
             
-        } 
+        } else if (( strcmp(argv[ii], "-v") == 0)) {
+                printf("Verbose logging enabled\n");
+                verbose = true;
+        }
     }
 
     // Add textinput_interactive mode, check for extra options via environment variable if available

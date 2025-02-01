@@ -130,6 +130,7 @@ void setKeyRepeat(int code, bool is_pressed);
 void processKeys();
 
 extern int uinp_fd;
+extern bool verbose;
 extern uinput_user_dev uidev;
 
 extern GptokeybConfig config;

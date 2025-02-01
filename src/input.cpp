@@ -45,8 +45,9 @@ bool handleInputEvent(const SDL_Event& event)
     case SDL_CONTROLLERBUTTONUP:
         {
             const bool is_pressed = event.type == SDL_CONTROLLERBUTTONDOWN;
-
-            fprintf(stderr, "SDL_BTN_%s: %d\n", (is_pressed ? "DOWN" : "UP"), event.cbutton.button);
+            if (verbose) {
+                fprintf(stderr, "SDL_BTN_%s: %d\n", (is_pressed ? "DOWN" : "UP"), event.cbutton.button);
+            }
 
             if (state.textinputinteractive_mode_active) {
                 handleEventBtnInteractiveKeyboard(event, is_pressed);
