@@ -842,29 +842,34 @@ void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event)
         break;
     } // switch (event.caxis.axis)
 
-    // fake mouse
-    if (config.left_analog_as_mouse && left_axis_movement) {
-        deadzone_calc(
-            state.mouseX, state.mouseY,
-            state.current_left_analog_x, state.current_left_analog_y);
-    } else if (config.right_analog_as_mouse && right_axis_movement) {
-        deadzone_calc(
-            state.mouseX, state.mouseY,
-            state.current_right_analog_x, state.current_right_analog_y);
-    } else {
-        // Analogs trigger keys
-        if (!(state.textinputinteractive_mode_active)) {
+    if (left_axis_movement) {
+        if (config.left_analog_as_mouse) {
+            // Left analog generates fake mouse
+            deadzone_calc(
+                state.mouseX, state.mouseY,
+                state.current_left_analog_x, state.current_left_analog_y);
+        } else if (!(state.textinputinteractive_mode_active)) {
+            // Left analog triggers keys
             _ANALOG_AXIS_TRIGGER(left_analog, up,    y, _ANALOG_AXIS_NEG, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(left_analog, down,  y, _ANALOG_AXIS_POS, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(left_analog, left,  x, _ANALOG_AXIS_NEG, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(left_analog, right, x, _ANALOG_AXIS_POS, _ANALOG_AXIS_ZERO)
+        } //!(state.textinputinteractive_mode_active)
 
+    } else if (right_axis_movement) {
+        if (config.right_analog_as_mouse) {
+            // Right analog generates fake mouse
+            deadzone_calc(
+                state.mouseX, state.mouseY,
+                state.current_right_analog_x, state.current_right_analog_y);
+        } else if (!(state.textinputinteractive_mode_active)) {
+            // Right analog triggers keys
             _ANALOG_AXIS_TRIGGER(right_analog, up,    y, _ANALOG_AXIS_NEG, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(right_analog, down,  y, _ANALOG_AXIS_POS, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(right_analog, left,  x, _ANALOG_AXIS_NEG, _ANALOG_AXIS_ZERO)
             _ANALOG_AXIS_TRIGGER(right_analog, right, x, _ANALOG_AXIS_POS, _ANALOG_AXIS_ZERO)
         } //!(state.textinputinteractive_mode_active)
-    } // Analogs trigger keys 
+    }
 
     if (state.hotkey_pressed) {
         handleAnalogTrigger(
