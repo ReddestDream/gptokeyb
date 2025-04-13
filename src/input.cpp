@@ -73,8 +73,14 @@ bool handleInputEvent(const SDL_Event& event)
 
             SDL_GameController* controller = SDL_GameControllerOpen(event.cdevice.which);
             if (controller) {
-                const char *name = SDL_GameControllerNameForIndex(event.cdevice.which);
-                printf("[GPTK]: Joystick %i has game controller name '%s'\n", event.cdevice.which, name);
+                SDL_Joystick *joystick = SDL_GameControllerGetJoystick(controller);
+                const char *name = SDL_JoystickName(joystick); //Joystick name is the actual device name, not the name given to the device in gamecontrollerdb.txt
+                printf("[GPTK]: Joystick %i has device name '%s'\n", event.cdevice.which, name);
+                // Reject our own fake xbox360 controller to prevent creating a loop of input events
+                if (xbox360_mode && strcmp(name, "Microsoft X-Box 360 pad") == 0)
+                {
+                    SDL_GameControllerClose(controller);
+                }
             }
 
         } else {
