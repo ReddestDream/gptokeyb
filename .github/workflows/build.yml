@@ -41,7 +41,6 @@ jobs:
         run: |
           dpkg --add-architecture ${{ matrix.arch.pkg_arch }}
           apt update
-          # Added g++-<cross> specifically for C++
           apt install -y --no-install-recommends \
             python3 git build-essential pkg-config cmake ninja-build ca-certificates \
             linux-libc-dev-${{ matrix.arch.pkg_arch }}-cross \
@@ -58,27 +57,27 @@ jobs:
         run: |
           mkdir build && cd build
           
-          # Explicitly define cross-compilation details so we don't need a toolchain file
+          # CRITICAL FIX: Tell pkg-config to look in the cross-compile library folder
+          export PKG_CONFIG_LIBDIR="/usr/lib/${{ matrix.arch.cross }}/pkgconfig:/usr/share/pkgconfig"
+          
+          # We pass CMAKE_CXX_FLAGS to explicitly include libevdev-1.0, 
+          # ensuring the header check passes even if find_package behaves weirdly.
           cmake ../ -GNinja \
             -DCMAKE_SYSTEM_NAME=Linux \
             -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch.name }} \
             -DCMAKE_C_COMPILER=/usr/bin/${{ matrix.arch.cross }}-gcc \
             -DCMAKE_CXX_COMPILER=/usr/bin/${{ matrix.arch.cross }}-g++ \
             -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-I/usr/include/libevdev-1.0" \
             -DLIBEVDEV_LIBRARY="/usr/lib/${{ matrix.arch.cross }}/libevdev.so" \
-            -DLIBEVDEV_INCLUDE_DIR="/usr/include/libevdev-1.0" \
-            -DSDL2_LIBRARY="/usr/lib/${{ matrix.arch.cross }}/libSDL2.so" \
-            -DSDL2_INCLUDE_DIR="/usr/include/SDL2"
+            -DLIBEVDEV_INCLUDE_DIR="/usr/include/libevdev-1.0"
           
           cmake --build .
         
       - name: Prepare Export
         run: |
           cd build
-          # Strip the binary
           /usr/${{ matrix.arch.cross }}/bin/strip gptokeyb
-          
-          # Rename to extension for upload (we fix the main name in the package step)
           mv gptokeyb gptokeyb.${{ matrix.arch.executable }}
 
       - name: Upload Artifacts
@@ -108,12 +107,13 @@ jobs:
         run: |
           mkdir build && cd build
           
-          # -Wno-error=unused-result handling for newer GCC
+          # -Wno-error=unused-result: prevents errors on newer GCC versions
+          # -I/usr/include/libevdev-1.0: ensures headers are found
           cmake ../ -GNinja \
             -DCMAKE_BUILD_TYPE=Release \
             -DLIBEVDEV_INCLUDE_DIR="/usr/include/libevdev-1.0" \
-            -DCMAKE_CXX_FLAGS="-Wno-error=unused-result" \
-            -DCMAKE_C_FLAGS="-Wno-error=unused-result"
+            -DCMAKE_CXX_FLAGS="-Wno-error=unused-result -I/usr/include/libevdev-1.0" \
+            -DCMAKE_C_FLAGS="-Wno-error=unused-result -I/usr/include/libevdev-1.0"
             
           cmake --build .
 
@@ -156,9 +156,7 @@ jobs:
           cp artifacts/gptokeyb_armhf/* staging/
           cp artifacts/gptokeyb_x86_64/* staging/
           
-          # RENAME LOGIC:
-          # 1. gptokeyb.aarch64 -> gptokeyb (No extension, per request)
-          # 2. Others keep their extension (.armhf, .x86_64)
+          # Rename gptokeyb.aarch64 -> gptokeyb per requirements
           mv staging/gptokeyb.aarch64 staging/gptokeyb
           
           echo "Final Package Contents:"
