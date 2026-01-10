@@ -169,7 +169,6 @@ jobs:
           cd staging
           zip -r ../gptokeyb-all.zip ./*
 
-      # Upload the unzipped files (GitHub will zip the folder)
       - name: Upload Consolidated Artifact
         uses: actions/upload-artifact@v4
         with:
