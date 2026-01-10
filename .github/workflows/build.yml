@@ -29,7 +29,7 @@ jobs:
         arch: 
           - name: arm64
             cross: aarch64-linux-gnu
-            executable: aarch64 # We will handle the special naming in the package step
+            executable: aarch64
             pkg_arch: arm64
           - name: armhf
             cross: arm-linux-gnueabihf
