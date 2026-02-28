@@ -56,9 +56,10 @@ void UINPUT_SET_ABS_P(
 int setupFakeXbox360Device(uinput_user_dev& device, int fd)
 {
     strncpy(device.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
-    device.id.vendor = 0x045e;  /* Microsoft */
-    device.id.product = 0x028e; /* X-Box 360 */
-    device.id.version = 0x0104; /* Revision with proper dpad direction */
+    device.id.vendor = 0x045e;
+    device.id.product = 0x028e;
+    device.id.version = 0x0104;
+    device.id.bustype = BUS_USB;
 
     if (
             ioctl(fd, UI_SET_EVBIT, EV_KEY) || ioctl(fd, UI_SET_EVBIT, EV_SYN) ||
@@ -72,26 +73,26 @@ int setupFakeXbox360Device(uinput_user_dev& device, int fd)
             ioctl(fd, UI_SET_KEYBIT, BTN_SELECT) ||
             ioctl(fd, UI_SET_KEYBIT, BTN_START) || ioctl(fd, UI_SET_KEYBIT, BTN_MODE) ||
             // absolute (sticks)
-            ioctl(fd, UI_SET_ABSBIT, ABS_X) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_Y) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RX) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RY) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_Z) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {
+            ioctl(fd, UI_SET_ABSBIT, ABS_X) ||      // Left stick X
+            ioctl(fd, UI_SET_ABSBIT, ABS_Y) ||      // Left stick Y
+            ioctl(fd, UI_SET_ABSBIT, ABS_Z) ||      // Left Trigger
+            ioctl(fd, UI_SET_ABSBIT, ABS_RX) ||     // Right stick X
+            ioctl(fd, UI_SET_ABSBIT, ABS_RY) ||     // Right stick Y
+            ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||     // Right Trigger
+            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||  // D-pad X
+            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {  // D-pad Y
         fprintf(stderr, "[GPTK]: Failed to configure fake Xbox 360 controller\n");
         return -1;
     }
 
-    UINPUT_SET_ABS_P(&device, ABS_X, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_Y, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_RX, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_RY, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_Z, 0, 255, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_RZ, 0, 255, 0, 0);
+    UINPUT_SET_ABS_P(&device, ABS_X, -32768, 32767, 16, 128);      // Left stick X
+    UINPUT_SET_ABS_P(&device, ABS_Y, -32768, 32767, 16, 128);      // Left stick Y
+    UINPUT_SET_ABS_P(&device, ABS_Z, 0, 255, 0, 0);                // Left trigger
+    UINPUT_SET_ABS_P(&device, ABS_RX, -32768, 32767, 16, 128);     // Right stick X
+    UINPUT_SET_ABS_P(&device, ABS_RY, -32768, 32767, 16, 128);     // Right stick Y
+    UINPUT_SET_ABS_P(&device, ABS_RZ, 0, 255, 0, 0);               // Right trigger
+    UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);             // D-pad X
+    UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);             // D-pad Y
 
     return 0;
 }

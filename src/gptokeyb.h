@@ -60,6 +60,8 @@
 #define SDL_DEFAULT_REPEAT_DELAY 500
 #define SDL_DEFAULT_REPEAT_INTERVAL 30
 
+#define MAX_CONTROLLERS 64
+
 #include "structs.h"
 
 DZ_MODE deadzone_get_mode(const char *str);
@@ -84,6 +86,8 @@ void handleEventAxisFakeKeyboardMouseDevice(const SDL_Event &event);
 
 // input.cpp
 bool handleInputEvent(const SDL_Event& event);
+bool isExistingController(SDL_JoystickID id);
+void recordExistingControllers();
 
 // Xbox360.cpp
 int setupFakeXbox360Device(uinput_user_dev& device, int fd);

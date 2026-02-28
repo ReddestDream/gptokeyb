@@ -1,0 +1,209 @@
+name: gptokeyb Build & Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/README.md'
+  pull_request:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**/README.md'
+
+permissions:
+  contents: write
+
+jobs:
+  # ----------------------------------------------------------------
+  # JOB 1: Cross-Compilation for ARM (Debian Bullseye Container)
+  # ----------------------------------------------------------------
+  build-arm:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye
+    name: Debian ${{ matrix.arch.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: 
+          - name: arm64
+            cross: aarch64-linux-gnu
+            executable: aarch64
+            pkg_arch: arm64
+          - name: armhf
+            cross: arm-linux-gnueabihf
+            executable: armhf
+            pkg_arch: armhf
+
+    steps:
+      - name: Install ${{ matrix.arch.name }} dependencies
+        run: |
+          dpkg --add-architecture ${{ matrix.arch.pkg_arch }}
+          apt update
+          apt install -y --no-install-recommends \
+            python3 git build-essential pkg-config cmake ninja-build ca-certificates \
+            linux-libc-dev-${{ matrix.arch.pkg_arch }}-cross \
+            g++-${{ matrix.arch.cross }} \
+            gcc-${{ matrix.arch.cross }} \
+            libsdl2-dev:${{ matrix.arch.pkg_arch }} \
+            libevdev-dev:${{ matrix.arch.pkg_arch }}
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build ${{ matrix.arch.name }}
+        run: |
+          mkdir build && cd build
+          
+          # CRITICAL FIX: Tell pkg-config to look in the cross-compile library folder
+          export PKG_CONFIG_LIBDIR="/usr/lib/${{ matrix.arch.cross }}/pkgconfig:/usr/share/pkgconfig"
+          
+          # We pass CMAKE_CXX_FLAGS to explicitly include libevdev-1.0, 
+          # ensuring the header check passes even if find_package behaves weirdly.
+          cmake ../ -GNinja \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=${{ matrix.arch.name }} \
+            -DCMAKE_C_COMPILER=/usr/bin/${{ matrix.arch.cross }}-gcc \
+            -DCMAKE_CXX_COMPILER=/usr/bin/${{ matrix.arch.cross }}-g++ \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_FLAGS="-I/usr/include/libevdev-1.0" \
+            -DLIBEVDEV_LIBRARY="/usr/lib/${{ matrix.arch.cross }}/libevdev.so" \
+            -DLIBEVDEV_INCLUDE_DIR="/usr/include/libevdev-1.0"
+          
+          cmake --build .
+        
+      - name: Prepare Export
+        run: |
+          cd build
+          /usr/${{ matrix.arch.cross }}/bin/strip gptokeyb
+          mv gptokeyb gptokeyb.${{ matrix.arch.executable }}
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gptokeyb_${{ matrix.arch.name }}
+          path: |
+            ${{ github.workspace }}/build/gptokeyb.${{ matrix.arch.executable }}
+
+  # ----------------------------------------------------------------
+  # JOB 2: Native Build for x86_64 (Ubuntu 24.04)
+  # ----------------------------------------------------------------
+  build-native:
+    runs-on: ubuntu-24.04
+    name: Ubuntu x86_64
+    steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libsdl2-dev libevdev-dev cmake ninja-build build-essential git pkg-config
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build x86_64
+        run: |
+          mkdir build && cd build
+          
+          # -Wno-error=unused-result: prevents errors on newer GCC versions
+          # -I/usr/include/libevdev-1.0: ensures headers are found
+          cmake ../ -GNinja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DLIBEVDEV_INCLUDE_DIR="/usr/include/libevdev-1.0" \
+            -DCMAKE_CXX_FLAGS="-Wno-error=unused-result -I/usr/include/libevdev-1.0" \
+            -DCMAKE_C_FLAGS="-Wno-error=unused-result -I/usr/include/libevdev-1.0"
+            
+          cmake --build .
+
+      - name: Prepare Export
+        run: |
+          cd build
+          strip gptokeyb
+          mv gptokeyb gptokeyb.x86_64
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: gptokeyb_x86_64
+          path: |
+            ${{ github.workspace }}/build/gptokeyb.x86_64
+
+  # ----------------------------------------------------------------
+  # JOB 3: Package (Runs on all builds) & Release (Manual Only)
+  # ----------------------------------------------------------------
+  package:
+    needs: [build-arm, build-native]
+    runs-on: ubuntu-latest
+    name: Package Artifacts
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Consolidate and Rename
+        run: |
+          mkdir staging
+          
+          # Copy files to staging
+          cp artifacts/gptokeyb_arm64/* staging/
+          cp artifacts/gptokeyb_armhf/* staging/
+          cp artifacts/gptokeyb_x86_64/* staging/
+          
+          # Rename gptokeyb.aarch64 -> gptokeyb per requirements
+          mv staging/gptokeyb.aarch64 staging/gptokeyb
+          
+          echo "Final Package Contents:"
+          ls -R staging
+
+      - name: Create Zip Archive for Release
+        run: |
+          cd staging
+          zip -r ../gptokeyb-all.zip ./*
+
+      - name: Upload Consolidated Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: gptokeyb-complete-bundle
+          path: staging/*
+
+      # ----------------------------------------------------------------
+      # Release Logic (Manual Only)
+      # ----------------------------------------------------------------
+      
+      - name: Generate Version and Changelog
+        if: github.event_name == 'workflow_dispatch'
+        id: vars
+        run: |
+          VERSION=$(date +'%Y.%m.%d-%H%M')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          
+          echo "Generating changelog..."
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LAST_TAG" ]; then
+            echo "## Initial Release or No Tags Found" > release_notes.txt
+            echo "" >> release_notes.txt
+            git log -n 10 --pretty=format:"- %h %s" >> release_notes.txt
+          else
+            echo "## Changes since $LAST_TAG" > release_notes.txt
+            echo "" >> release_notes.txt
+            git log ${LAST_TAG}..HEAD --pretty=format:"- %h %s" >> release_notes.txt
+          fi
+
+      - name: Create GitHub Release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create ${{ env.VERSION }} \
+            gptokeyb-all.zip \
+            --title "gptokeyb ${{ env.VERSION }}" \
+            --notes-file release_notes.txt \
+            --target ${{ github.sha }}
