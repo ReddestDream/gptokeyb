@@ -56,8 +56,10 @@ void UINPUT_SET_ABS_P(
 int setupFakeXbox360Device(uinput_user_dev& device, int fd)
 {
     strncpy(device.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
-    device.id.vendor = 0x045e;  /* sample vendor */
-    device.id.product = 0x028e; /* sample product */
+    device.id.vendor = 0x045e;
+    device.id.product = 0x028e;
+    device.id.version = 0x0110;
+    device.id.bustype = BUS_USB;
 
     if (
             ioctl(fd, UI_SET_EVBIT, EV_KEY) || ioctl(fd, UI_SET_EVBIT, EV_SYN) ||
@@ -71,14 +73,14 @@ int setupFakeXbox360Device(uinput_user_dev& device, int fd)
             ioctl(fd, UI_SET_KEYBIT, BTN_SELECT) ||
             ioctl(fd, UI_SET_KEYBIT, BTN_START) || ioctl(fd, UI_SET_KEYBIT, BTN_MODE) ||
             // absolute (sticks)
-            ioctl(fd, UI_SET_ABSBIT, ABS_X) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_Y) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RX) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RY) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_Z) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||
-            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {
+            ioctl(fd, UI_SET_ABSBIT, ABS_X) ||      // Left stick X
+            ioctl(fd, UI_SET_ABSBIT, ABS_Y) ||      // Left stick Y
+            ioctl(fd, UI_SET_ABSBIT, ABS_Z) ||      // Left Trigger
+            ioctl(fd, UI_SET_ABSBIT, ABS_RX) ||     // Right stick X
+            ioctl(fd, UI_SET_ABSBIT, ABS_RY) ||     // Right stick Y
+            ioctl(fd, UI_SET_ABSBIT, ABS_RZ) ||     // Right Trigger
+            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0X) ||  // D-pad X
+            ioctl(fd, UI_SET_ABSBIT, ABS_HAT0Y)) {  // D-pad Y
         fprintf(stderr, "[GPTK]: Failed to configure fake Xbox 360 controller\n");
         return -1;
     }
