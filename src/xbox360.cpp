@@ -58,7 +58,7 @@ int setupFakeXbox360Device(uinput_user_dev& device, int fd)
     strncpy(device.name, "Microsoft X-Box 360 pad", UINPUT_MAX_NAME_SIZE);
     device.id.vendor = 0x045e;
     device.id.product = 0x028e;
-    device.id.version = 0x0110;
+    device.id.version = 0x0104;
     device.id.bustype = BUS_USB;
 
     if (
