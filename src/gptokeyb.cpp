@@ -255,6 +255,8 @@ int main(int argc, char* argv[])
         return -1;
     }
 
+    recordExistingControllers();
+
     // Create fake input device (not needed in kill mode)
     //if (!kill_mode) {  
     if (config_mode || xbox360_mode || textinputinteractive_mode) { // initialise device, even in kill mode, now that kill mode will work with config & xbox modes
