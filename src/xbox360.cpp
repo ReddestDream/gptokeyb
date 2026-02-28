@@ -85,14 +85,14 @@ int setupFakeXbox360Device(uinput_user_dev& device, int fd)
         return -1;
     }
 
-    UINPUT_SET_ABS_P(&device, ABS_X, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_Y, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_RX, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_RY, -32768, 32767, 16, 128);
-    UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_Z, 0, 255, 0, 0);
-    UINPUT_SET_ABS_P(&device, ABS_RZ, 0, 255, 0, 0);
+    UINPUT_SET_ABS_P(&device, ABS_X, -32768, 32767, 16, 128);      // Left stick X
+    UINPUT_SET_ABS_P(&device, ABS_Y, -32768, 32767, 16, 128);      // Left stick Y
+    UINPUT_SET_ABS_P(&device, ABS_Z, 0, 255, 0, 0);                // Left trigger
+    UINPUT_SET_ABS_P(&device, ABS_RX, -32768, 32767, 16, 128);     // Right stick X
+    UINPUT_SET_ABS_P(&device, ABS_RY, -32768, 32767, 16, 128);     // Right stick Y
+    UINPUT_SET_ABS_P(&device, ABS_RZ, 0, 255, 0, 0);               // Right trigger
+    UINPUT_SET_ABS_P(&device, ABS_HAT0X, -1, 1, 0, 0);             // D-pad X
+    UINPUT_SET_ABS_P(&device, ABS_HAT0Y, -1, 1, 0, 0);             // D-pad Y
 
     return 0;
 }
